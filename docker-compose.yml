@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: financetracker_db
+    environment:
+      POSTGRES_DB: finance_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: superuser-psswd
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:latest
+    container_name: financetracker_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    
+    
+#services:
+#  lit-db:
+#    image: postgres:16-alpine
+#    container_name: lit_posgres_db
+#    environment:
+#      POSTGRES_DB: litservice_db
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: superuser-psswd
+#    ports:
+#      - "5433:5432"
+#    volumes:
+#      - lit_db_data:/var/lib/postgresql/data
+#    networks:
+#      - lit-network
+#
+#  lit-api:
+#    image: litservice-backend:latest
+#    container_name: lit_backend_api
+#    build:
+#      context: .
+#      dockerfile: LitService.API/Dockerfile
+#    ports:
+#      - "5000:8080"
+#    environment:
+#      - ASPNETCORE_ENVIRONMENT=Development
+#      - ConnectionStrings__DefaultConnection=Host=lit-db;Port=5432;Database=litservice_db;Username=postgres;Password=superuser-psswd
+#    depends_on:
+#      - lit-db
+#    networks:
+#      - lit-network
+#
+#volumes:
+#  lit_db_data:
+#
+#networks:
+#  lit-network:
+#    driver: bridge
