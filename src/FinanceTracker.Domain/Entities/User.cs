@@ -4,22 +4,22 @@ namespace FinanceTracker.Domain.Entities;
 
 public class User
 {
-    private User(Guid id, string email, string passwordHash)
+    private User(Guid id, string email, string passwordHash, string name)
     {
         Id = id;
         Email = email;
         PasswordHash = passwordHash;
+        Name = name;
         CreatedAtUtc = DateTime.UtcNow;
     }
-    
-    private User() { }
     
     public Guid Id { get; }
     public string Email { get; } 
     public string PasswordHash { get; }
+    public string Name { get; private set; }
     public DateTime CreatedAtUtc { get; }
     
-    public static Result<User> Create(Guid id, string email, string passwordHash)
+    public static Result<User> Create(Guid id, string email, string passwordHash, string name)
     {
         if (string.IsNullOrWhiteSpace(email))
         {
@@ -31,7 +31,12 @@ public class User
             return Result.Failure<User>("Password hash cannot be empty");
         }
         
-        var user = new User(id, email, passwordHash);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<User>("Name cannot be empty");
+        }
+        
+        var user = new User(id, email, passwordHash, name);
         return Result.Success(user);
     }
     
