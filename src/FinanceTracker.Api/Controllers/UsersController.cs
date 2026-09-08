@@ -25,7 +25,7 @@ public class UsersController : ControllerBase
         await _usersService.RegisterAsync(request, ct);
         return Ok("User successfully registered");
     }
-
+    
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
