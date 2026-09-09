@@ -1,6 +1,6 @@
 namespace FinanceTracker.Domain.Enums;
 
-public enum TransactionType
+public enum CategoryType
 {
     Income = 1,
     Expense = 2

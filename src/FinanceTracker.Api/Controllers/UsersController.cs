@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using FinanceTracker.Application.DTOs.Auth;
+using FinanceTracker.Application.DTOs;
 using FinanceTracker.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,16 +18,14 @@ public class UsersController : ControllerBase
         _usersService = usersService;
     }
 
-    [HttpPost]
-    [Route("register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
         await _usersService.RegisterAsync(request, ct);
         return Ok("User successfully registered");
     }
     
-    [HttpPost]
-    [Route("login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
         var token = await _usersService.LoginAsync(request, ct);

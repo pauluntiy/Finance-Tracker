@@ -1,4 +1,4 @@
-using FinanceTracker.Application.DTOs.Auth;
+using FinanceTracker.Application.DTOs;
 
 namespace FinanceTracker.Application.Interfaces.Services;
 

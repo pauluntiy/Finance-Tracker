@@ -63,6 +63,8 @@ public static class DependencyInjection
                     }
                 };
             });
+        
+        services.AddScoped<ICurrentUserIdAccessor, CurrentUserIdAccessor>();
 
         services.AddAuthorization();
         

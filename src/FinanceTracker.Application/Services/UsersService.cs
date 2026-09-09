@@ -1,5 +1,5 @@
 using CSharpFunctionalExtensions;
-using FinanceTracker.Application.DTOs.Auth;
+using FinanceTracker.Application.DTOs;
 using FinanceTracker.Application.Interfaces.Auth;
 using FinanceTracker.Application.Interfaces.Persistence;
 using FinanceTracker.Application.Interfaces.Services;
