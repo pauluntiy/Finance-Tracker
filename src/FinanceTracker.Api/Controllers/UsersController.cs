@@ -48,6 +48,6 @@ public class UsersController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
-        return Ok(new { id = userId, email });
+        return Ok(new { id = userId, email } );
     }
 }

@@ -1,5 +1,3 @@
-using CSharpFunctionalExtensions;
-using CSharpFunctionalExtensions.ValueTasks;
 using FinanceTracker.Application.DTOs;
 using FinanceTracker.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +24,7 @@ public class CategoriesController : ControllerBase
         
         return result.IsSuccess 
             ? Ok(result.Value)
-            : BadRequest(result.Error);
+            : BadRequest(new { error = result.Error});
     }
     
     [HttpGet("{id:guid}")]
@@ -36,7 +34,7 @@ public class CategoriesController : ControllerBase
         
         return result.IsSuccess 
             ? Ok(result.Value)
-            : NotFound(result.Error);
+            : NotFound(new { error = result.Error});
     }
 
     [HttpPost]
@@ -47,7 +45,7 @@ public class CategoriesController : ControllerBase
         
         return result.IsSuccess 
             ? Ok(result.Value)
-            : BadRequest(result.Error);
+            : BadRequest(new { error = result.Error});
     }
 
     [HttpPut("{id:guid}")]
@@ -58,7 +56,7 @@ public class CategoriesController : ControllerBase
         
         return result.IsSuccess 
             ? NoContent()
-            : NotFound(result.Error);
+            : NotFound(new { error = result.Error});
     }
 
     [HttpDelete("{id:guid}")]
@@ -68,6 +66,6 @@ public class CategoriesController : ControllerBase
         
         return result.IsSuccess 
             ? NoContent()
-            : NotFound(result.Error);
+            : NotFound(new { error = result.Error});
     }
 }

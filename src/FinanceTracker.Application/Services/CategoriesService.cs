@@ -66,7 +66,8 @@ public class CategoriesService(IApplicationDbContext dbContext,
             Guid.NewGuid(),
             request.Name,
             request.ColorHex,
-            request.Type);
+            request.Type,
+            userId);
         
         if (categoryResult.IsFailure)
             return Result.Failure<CategoryDto>(categoryResult.Error);

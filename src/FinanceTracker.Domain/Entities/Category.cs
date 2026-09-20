@@ -5,30 +5,38 @@ namespace FinanceTracker.Domain.Entities;
 
 public class Category
 {
-    private Category(Guid id, string name, string colorHex, CategoryType type)
+    private Category(Guid id, string name, string colorHex, CategoryType type, Guid? userId)
     {
         Id = id;
         Name = name;
         ColorHex = colorHex;
         Type = type;
+        UserId = userId;
     }
+    
     public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string ColorHex { get; private set; }
     public CategoryType Type { get; private set; }
+    public Guid? UserId { get; private set; }
 
-    public static Result<Category> Create(Guid id, string name, string? colorHex, CategoryType type)
+    public static Result<Category> Create(Guid id, string name, string? colorHex, CategoryType type,  Guid? userId)
     {
+        if (id == Guid.Empty)
+            return Result.Failure<Category>("Id cannot be empty");
+        
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<Category>("Category name cannot be empty");
         
-        var result = new Category(id, name, colorHex ?? "#808080",  type);
+        if (userId == Guid.Empty)
+            return Result.Failure<Category>("UserId cannot be empty");
+        
+        var result = new Category(id, name, colorHex ?? "#808080",  type,  userId);
         
         return Result.Success(result);
     }
     
     // navigation properties
-    public Guid? UserId { get; private set; }
     public User? User { get; private set; }
     
     public ICollection<Transaction> Transactions { get; private set; } = new List<Transaction>();

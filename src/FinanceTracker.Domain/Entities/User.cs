@@ -44,6 +44,4 @@ public class User
     public ICollection<Transaction> Transactions { get; private set; } = new List<Transaction>();
     public ICollection<Category> Categories { get; private set; } = new List<Category>();
     public ICollection<Subscription> Subscriptions { get; private set; } = new List<Subscription>();
-
-    
 }
