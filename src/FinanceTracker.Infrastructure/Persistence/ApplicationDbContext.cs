@@ -16,7 +16,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // apply Fluent Api configs (EntityTypeConfiguration) from current assembly
+        // apply EF Core Fluent Api configs (EntityTypeConfiguration) from current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }

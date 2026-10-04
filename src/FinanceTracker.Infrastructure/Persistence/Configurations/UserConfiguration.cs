@@ -15,14 +15,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(256);
-        
-        builder.HasIndex(u => u.Email)
-            .IsUnique();
 
         builder.Property(u => u.PasswordHash)
             .IsRequired();
 
         builder.Property(u => u.CreatedAtUtc)
+            .HasColumnType("timestamp with time zone")
             .IsRequired();
+                
+        builder.HasIndex(u => u.Email)
+            .IsUnique();
     }
 }

@@ -17,9 +17,11 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .IsRequired();
 
         builder.Property(t => t.Description)
-            .HasMaxLength(500);
+            .HasMaxLength(500)
+            .IsRequired(false);
         
         builder.Property(t => t.DateUtc)
+            .HasColumnType("timestamp with time zone")
             .IsRequired();
 
         builder.HasOne(t => t.Category)
@@ -31,5 +33,12 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .WithMany(u => u.Transactions)
             .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasIndex(t => new { t.UserId, t.DateUtc })
+            .HasDatabaseName("IX_Transactions_UserId_DateUtc");
+
+        builder.HasIndex(t => new { t.UserId, t.CategoryId, t.DateUtc })
+            .HasDatabaseName("IX_Transactions_UserId_CategoryId_DateUtc");
+
     }
 }

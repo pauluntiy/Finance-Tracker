@@ -1,7 +1,9 @@
 using FinanceTracker.Api.Middleware;
 using FinanceTracker.Application;
 using FinanceTracker.Infrastructure;
+using FinanceTracker.Infrastructure.Persistence;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +33,10 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
+
+await ApplyMigrationsAndSeedAsync(app);
 
 app.UseExceptionHandler();
 app.UseCors("FrontendPolicy");
@@ -53,5 +58,29 @@ app.UseCookiePolicy(new CookiePolicyOptions
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
+
+
+static async Task ApplyMigrationsAndSeedAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        logger.LogInformation("Applying database migrations...");
+        await dbContext.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied successfully.");
+        
+        await DbSeeder.SeedAsync(dbContext, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while migrating the database.");
+        throw;
+    }
+}
