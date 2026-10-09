@@ -6,13 +6,13 @@ namespace FinanceTracker.Domain.Entities;
 public class Subscription
 {
     private Subscription(Guid id, string title, decimal amount, BillingPeriod billingPeriod,
-        DateOnly date, bool isActive, Guid categoryId, Guid userId)
+        DateOnly nextPaymentDate, bool isActive, Guid categoryId, Guid userId)
     {
         Id = id;
         Title = title;
         Amount = amount;
-        Period = billingPeriod;
-        NextPaymentDate = date;
+        BillingPeriod = billingPeriod;
+        NextPaymentDate = nextPaymentDate;
         IsActive = isActive;
         CategoryId = categoryId;
         UserId = userId;
@@ -21,7 +21,7 @@ public class Subscription
     public Guid Id { get; private set; }
     public string Title { get; private set; }
     public decimal Amount { get; private set; }
-    public BillingPeriod Period { get; private set; }
+    public BillingPeriod BillingPeriod { get; private set; }
     public DateOnly NextPaymentDate { get; private set; }
     public bool IsActive { get; private set; }
     public Guid CategoryId { get; private set; }

@@ -1,8 +1,10 @@
 using System.Text;
 using FinanceTracker.Application.Interfaces.Auth;
 using FinanceTracker.Application.Interfaces.Persistence;
+using FinanceTracker.Application.Interfaces.Services;
 using FinanceTracker.Infrastructure.Auth;
 using FinanceTracker.Infrastructure.Persistence;
+using FinanceTracker.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,23 +18,35 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, 
         IConfiguration configuration)
     {
-        // DbContext
+        // Connection String
+        var connectionString = configuration.GetConnectionString(nameof(ApplicationDbContext)) 
+            ?? throw new InvalidOperationException($"Connection string {nameof(ApplicationDbContext)} not found.");;
+        
+        // Entity Framework Core
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString(nameof(ApplicationDbContext))));
+            options.UseNpgsql(connectionString));
         
-        services.AddScoped<IApplicationDbContext>(sp => 
-            sp.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IApplicationDbContext>(serviceProvider => 
+            serviceProvider.GetRequiredService<ApplicationDbContext>());
         
-        // Auth Services
+        // Dapper & Repositories
+        services.AddSingleton<ISqlConnectionFactory>(new SqlConnectionFactory(connectionString));
+        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        
+        // HttpContextAccessor for CurrentUserIdAccessor
+        services.AddHttpContextAccessor();
+        
+        // Auth Infrastructure
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtProvider, JwtProvider>();
-                
+        services.AddScoped<ICurrentUserIdAccessor, CurrentUserIdAccessor>();
 
         // Jwt Options
-        services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
-        
-        var jwtOptions = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>()
+        var jwtSection = configuration.GetSection(nameof(JwtOptions));
+        var jwtOptions = jwtSection.Get<JwtOptions>()
                          ?? throw new InvalidOperationException("JwtOptions section is missing in appsettings.json");
+        
+        services.Configure<JwtOptions>(jwtSection);
         
         // Jwt Extraction Configuration
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -64,8 +78,6 @@ public static class DependencyInjection
                 };
             });
         
-        services.AddScoped<ICurrentUserIdAccessor, CurrentUserIdAccessor>();
-
         services.AddAuthorization();
         
         return services;

@@ -4,13 +4,13 @@ namespace FinanceTracker.Domain.Entities;
 
 public class Transaction
 {
-    private Transaction(Guid id, decimal amount, string? description, DateTime date, 
+    private Transaction(Guid id, decimal amount, string? description, DateTime dateUtc, 
         Guid categoryId, Guid userId)
     {
         Id = id;
         Amount = amount;
         Description = description;
-        DateUtc = date;
+        DateUtc = dateUtc;
         CategoryId = categoryId;
         UserId = userId;
     }

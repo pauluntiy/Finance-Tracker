@@ -19,5 +19,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         // apply EF Core Fluent Api configs (EntityTypeConfiguration) from current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
+        
     }
 } 

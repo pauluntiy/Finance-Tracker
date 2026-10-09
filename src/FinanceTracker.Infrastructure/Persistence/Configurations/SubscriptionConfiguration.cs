@@ -8,7 +8,7 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
 {
     public void Configure(EntityTypeBuilder<Subscription> builder)
     {
-        builder.ToTable("subscriptions");
+        builder.ToTable("Subscriptions");
 
         builder.HasKey(s => s.Id);
         
@@ -20,7 +20,7 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
             .HasColumnType("numeric(18,2)")
             .IsRequired();
         
-        builder.Property(s => s.Period)
+        builder.Property(s => s.BillingPeriod)
             .IsRequired();
         
         builder.Property(s => s.NextPaymentDate)
@@ -37,7 +37,7 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasIndex(s => new { s.IsActive, s.NextPaymentDate})
+        builder.HasIndex(s => new { s.IsActive, NextPaymentDate = s.NextPaymentDate})
             .HasDatabaseName("IX_Subscriptions_IsActive_NextPaymentDate");
     }
 }

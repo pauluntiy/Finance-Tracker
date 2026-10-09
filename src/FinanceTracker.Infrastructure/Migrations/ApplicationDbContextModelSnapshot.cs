@@ -40,7 +40,7 @@ namespace FinanceTracker.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("TransactionType")
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.Property<Guid?>("UserId")
@@ -50,7 +50,9 @@ namespace FinanceTracker.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("categories", (string)null);
+                    b.HasIndex("UserId", "Name", "Type");
+
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("FinanceTracker.Domain.Entities.Subscription", b =>
@@ -62,6 +64,9 @@ namespace FinanceTracker.Infrastructure.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric(18,2)");
 
+                    b.Property<int>("BillingPeriod")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
@@ -71,13 +76,10 @@ namespace FinanceTracker.Infrastructure.Migrations
                     b.Property<DateOnly>("NextPaymentDate")
                         .HasColumnType("date");
 
-                    b.Property<int>("Period")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -88,7 +90,10 @@ namespace FinanceTracker.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("subscriptions", (string)null);
+                    b.HasIndex("IsActive", "NextPaymentDate")
+                        .HasDatabaseName("IX_Subscriptions_IsActive_NextPaymentDate");
+
+                    b.ToTable("Subscriptions", (string)null);
                 });
 
             modelBuilder.Entity("FinanceTracker.Domain.Entities.Transaction", b =>
@@ -117,9 +122,13 @@ namespace FinanceTracker.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "DateUtc")
+                        .HasDatabaseName("IX_Transactions_UserId_DateUtc");
 
-                    b.ToTable("transactions", (string)null);
+                    b.HasIndex("UserId", "CategoryId", "DateUtc")
+                        .HasDatabaseName("IX_Transactions_UserId_CategoryId_DateUtc");
+
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("FinanceTracker.Domain.Entities.User", b =>
@@ -136,6 +145,10 @@ namespace FinanceTracker.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
@@ -145,7 +158,7 @@ namespace FinanceTracker.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("FinanceTracker.Domain.Entities.Category", b =>
