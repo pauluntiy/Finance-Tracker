@@ -25,7 +25,7 @@ public class AnalyticsRepository(ISqlConnectionFactory connectionFactory) : IAna
                             AND (@EndDate IS NULL OR t."DateUtc" <= @EndDate);
                            """;
 
-        var command = new CommandDefinition(sql, new { UserId = userId, StartDate = fromDate, EndDate = toDate }, cancellationToken: ct);
+        var command = new CommandDefinition(sql, new { UserId = userId, StartDate = (DateTime?)fromDate, EndDate = (DateTime?)toDate }, cancellationToken: ct);
         
         return await connection.QueryFirstOrDefaultAsync<SummaryModel>(command)
             ?? new SummaryModel(0, 0);
@@ -59,7 +59,7 @@ public class AnalyticsRepository(ISqlConnectionFactory connectionFactory) : IAna
         
         var command = new CommandDefinition(
             sql, 
-            new { UserId = userId, StartDate = fromDate, EndDate = toDate, CategoryType = (int?)categoryType }, 
+            new { UserId = userId, StartDate = (DateTime?)fromDate, EndDate = (DateTime?)toDate, CategoryType = (int?)categoryType }, 
             cancellationToken: ct );
 
         var result = await connection.QueryAsync<CategorySummaryModel>(command);
@@ -125,7 +125,7 @@ public class AnalyticsRepository(ISqlConnectionFactory connectionFactory) : IAna
 
         var command = new CommandDefinition(
             sql,
-            new { UserId = userId, StartDate = fromDate, EndDate = toDate, TopCount = topCount },
+            new { UserId = userId, StartDate = (DateTime?)fromDate, EndDate = (DateTime?)toDate, TopCount = topCount },
             cancellationToken: ct);
         
         var result = await connection.QueryAsync<TopExpenseModel>(command);

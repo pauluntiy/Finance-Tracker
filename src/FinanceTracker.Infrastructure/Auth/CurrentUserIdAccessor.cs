@@ -10,7 +10,7 @@ public class CurrentUserIdAccessor(IHttpContextAccessor httpContextAccessor) : I
     {
         get
         {
-            var idClaim = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+            var idClaim = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
             return Guid.TryParse(idClaim, out var id) 
                 ? id : throw new UnauthorizedAccessException("User claim is missing or invalid");

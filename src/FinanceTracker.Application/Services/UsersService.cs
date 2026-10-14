@@ -14,42 +14,48 @@ public class UsersService(
     IJwtProvider jwtProvider)
     : IUsersService
 {
-    public async Task RegisterAsync(RegisterRequest request, CancellationToken ct = default)
+    public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
         bool userExists = await dbContext.Users
             .AnyAsync(u => u.Email == request.Email, ct);
         if (userExists)
-            throw new InvalidOperationException("User with the same email already exists.");
+            return Result.Failure("User with the same email already exists.");
         
         var hashedPassword = passwordHasher.Generate(request.Password);
         
         var user = User.Create(
-            Guid.NewGuid(), request.Email, hashedPassword, request.UserName).Value;
+            Guid.NewGuid(), request.Email, hashedPassword, request.UserName);
         
-        await dbContext.Users.AddAsync(user, ct);
+        if (user.IsFailure)
+            return Result.Failure(user.Error);
+        
+        await dbContext.Users.AddAsync(user.Value, ct);
         await dbContext.SaveChangesAsync(ct);
+        return Result.Success();
     }
 
-    public async Task<string> LoginAsync(LoginRequest request, CancellationToken ct = default)
+    public async Task<Result<string>> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
+        var testHash = passwordHasher.Generate("MySecret123!");
+        var isTestOk = passwordHasher.Verify(testHash, "MySecret123!");
+        if (!isTestOk)
+        {
+            // Если вы упали здесь — проблема 100% в коде самого passwordHasher!
+            throw new Exception("Хэшер сломан даже без базы данных!");
+        }
         // get user from db
         var user = await dbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == request.Email, ct);
 
         if (user == null)
-        {
-            throw new UnauthorizedAccessException("Invalid email or password.");
-        }
+            return Result.Failure<string>("Invalid email or password.");
         
         // verify password
         var verificationResult = passwordHasher.Verify(user.PasswordHash, request.Password);
         if (!verificationResult)
-        {
-            throw new UnauthorizedAccessException("Invalid email or password.");
-        }
+            return Result.Failure<string>("Invalid email or password. hhh");
 
-        // return jwt token
-        return jwtProvider.GenerateToken(user);
+        return Result.Success(jwtProvider.GenerateToken(user));
     }
 }

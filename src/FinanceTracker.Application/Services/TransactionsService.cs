@@ -91,7 +91,7 @@ public class TransactionsService(
             return Result.Failure<TransactionDto>("Category is not found or access is denied");
 
         var transactionResult = Transaction.Create(
-            new Guid(),
+            Guid.NewGuid(),
             request.Amount,
             request.Description,
             request.DateUtc,

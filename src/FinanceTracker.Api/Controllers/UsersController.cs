@@ -8,30 +8,31 @@ namespace FinanceTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController : ControllerBase
+public class UsersController(IUsersService usersService) : ControllerBase
 {
     private const string AuthCookieName = "tasty-cookie";
-    private readonly IUsersService _usersService;
-
-    public UsersController(IUsersService usersService)
-    {
-        _usersService = usersService;
-    }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
-        await _usersService.RegisterAsync(request, ct);
-        return Ok("User successfully registered");
+        var result = await usersService.RegisterAsync(request, ct);
+        return result.IsSuccess 
+            ? Ok("User successfully registered") 
+            : BadRequest(new { error = result.Error } );
     }
     
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
-        var token = await _usersService.LoginAsync(request, ct);
+        var token = await usersService.LoginAsync(request, ct);
 
-        Response.Cookies.Append(AuthCookieName, token);
-        return Ok("User successfully logged");
+        if (token.IsSuccess)
+        {
+            Response.Cookies.Append(AuthCookieName, token.Value);
+            return Ok("User successfully logged");
+        }
+
+        return Unauthorized(new { error = token.Error });
     }
     
     [HttpPost("logout")]

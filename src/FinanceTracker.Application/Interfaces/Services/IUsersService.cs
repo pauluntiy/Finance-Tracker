@@ -1,9 +1,10 @@
+using CSharpFunctionalExtensions;
 using FinanceTracker.Application.DTOs;
 
 namespace FinanceTracker.Application.Interfaces.Services;
 
 public interface IUsersService
 {
-    Task RegisterAsync(RegisterRequest request, CancellationToken ct = default);
-    Task<string> LoginAsync(LoginRequest request, CancellationToken ct = default);
+    Task<Result> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
+    Task<Result<string>> LoginAsync(LoginRequest request, CancellationToken ct = default);
 }
