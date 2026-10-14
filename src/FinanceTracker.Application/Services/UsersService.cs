@@ -36,13 +36,6 @@ public class UsersService(
 
     public async Task<Result<string>> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
-        var testHash = passwordHasher.Generate("MySecret123!");
-        var isTestOk = passwordHasher.Verify(testHash, "MySecret123!");
-        if (!isTestOk)
-        {
-            // Если вы упали здесь — проблема 100% в коде самого passwordHasher!
-            throw new Exception("Хэшер сломан даже без базы данных!");
-        }
         // get user from db
         var user = await dbContext.Users
             .AsNoTracking()
@@ -54,7 +47,7 @@ public class UsersService(
         // verify password
         var verificationResult = passwordHasher.Verify(user.PasswordHash, request.Password);
         if (!verificationResult)
-            return Result.Failure<string>("Invalid email or password. hhh");
+            return Result.Failure<string>("Invalid email or password.");
 
         return Result.Success(jwtProvider.GenerateToken(user));
     }

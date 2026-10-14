@@ -49,7 +49,9 @@ if (app.Environment.IsDevelopment())
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.Strict,
-    Secure = CookieSecurePolicy.Always
+    Secure = app.Environment.IsDevelopment()
+    ? CookieSecurePolicy.SameAsRequest
+    : CookieSecurePolicy.Always
 });
 
 app.UseAuthentication();

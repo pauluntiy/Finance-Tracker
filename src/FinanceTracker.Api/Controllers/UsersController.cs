@@ -1,5 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using FinanceTracker.Application.DTOs;
+using FinanceTracker.Application.Interfaces.Auth;
 using FinanceTracker.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +10,9 @@ namespace FinanceTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(IUsersService usersService) : ControllerBase
+public class UsersController(
+    IUsersService usersService, 
+    ICurrentUserIdAccessor currentUserIdAccessor) : ControllerBase
 {
     private const string AuthCookieName = "tasty-cookie";
 
@@ -28,7 +32,14 @@ public class UsersController(IUsersService usersService) : ControllerBase
 
         if (token.IsSuccess)
         {
-            Response.Cookies.Append(AuthCookieName, token.Value);
+            Response.Cookies.Append(AuthCookieName, token.Value, new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(720),
+                Secure = true,
+                Path = "/"
+            });
             return Ok("User successfully logged");
         }
 
@@ -46,9 +57,10 @@ public class UsersController(IUsersService usersService) : ControllerBase
     [HttpGet("me")]
     public IActionResult GetCurrentUser()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        
+        var userId = currentUserIdAccessor.UserId;;
+        var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 
-        return Ok(new { id = userId, email } );
+        return Ok(new UserResponse( userId, email));
     }
 }

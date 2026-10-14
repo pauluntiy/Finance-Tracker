@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters = new()
                 {
                     ValidateIssuer = true,

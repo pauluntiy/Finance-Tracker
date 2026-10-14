@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using FinanceTracker.Application.Interfaces.Auth;
 using Microsoft.AspNetCore.Http;
@@ -10,8 +11,7 @@ public class CurrentUserIdAccessor(IHttpContextAccessor httpContextAccessor) : I
     {
         get
         {
-            var idClaim = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
+            var idClaim = httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
             return Guid.TryParse(idClaim, out var id) 
                 ? id : throw new UnauthorizedAccessException("User claim is missing or invalid");
         }
