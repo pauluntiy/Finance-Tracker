@@ -1,18 +1,29 @@
 using CSharpFunctionalExtensions;
+using FinanceTracker.Application.Common;
 using FinanceTracker.Application.DTOs;
 
 namespace FinanceTracker.Application.Interfaces.Services;
 
 public interface ITransactionsService
 {
-    public Task<Result<PagedResult<TransactionDto>>> GetPagedAsync(TransactionFilterParams filterParams, 
-        CancellationToken ct =  default);
-    public Task<Result<TransactionDto>> GetByIdAsync(Guid id,
+    Task<Result<PagedResult<TransactionDto>, AppError>> GetPagedAsync(
+        TransactionFilterParams filterParams,
         CancellationToken ct = default);
-    public Task<Result<TransactionDto>> CreateAsync(CreateTransactionRequest request,
+
+    Task<Result<TransactionDto, AppError>> GetByIdAsync(
+        Guid id,
         CancellationToken ct = default);
-    public Task<Result> UpdateAsync(Guid id, UpdateTransactionRequest request,
+
+    Task<Result<TransactionDto, AppError>> CreateAsync(
+        CreateTransactionRequest request,
         CancellationToken ct = default);
-    public Task<Result> DeleteAsync(Guid id,
+
+    Task<Result<TransactionDto, AppError>> UpdateAsync(
+        Guid id,
+        UpdateTransactionRequest request,
+        CancellationToken ct = default);
+
+    Task<UnitResult<AppError>> DeleteAsync(
+        Guid id,
         CancellationToken ct = default);
 }

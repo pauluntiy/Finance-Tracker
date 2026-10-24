@@ -1,66 +1,82 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using FinanceTracker.Api.Extensions;
 using FinanceTracker.Application.DTOs;
 using FinanceTracker.Application.Interfaces.Auth;
 using FinanceTracker.Application.Interfaces.Services;
+using FinanceTracker.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace FinanceTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class UsersController(
-    IUsersService usersService, 
-    ICurrentUserIdAccessor currentUserIdAccessor) : ControllerBase
+    IUsersService usersService,
+    ICurrentUserIdAccessor currentUserIdAccessor,
+    IOptions<JwtOptions> jwtOptions) : ControllerBase
 {
     private const string AuthCookieName = "tasty-cookie";
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterRequest request,
+        CancellationToken ct)
     {
         var result = await usersService.RegisterAsync(request, ct);
-        return result.IsSuccess 
-            ? Ok("User successfully registered") 
-            : BadRequest(new { error = result.Error } );
+        return result.ToActionResult();
     }
-    
+
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request,
+        CancellationToken ct)
     {
-        var token = await usersService.LoginAsync(request, ct);
+        var result = await usersService.LoginAsync(request, ct);
 
-        if (token.IsSuccess)
-        {
-            Response.Cookies.Append(AuthCookieName, token.Value, new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(720),
-                Secure = true,
-                Path = "/"
-            });
-            return Ok("User successfully logged");
-        }
+        if (result.IsFailure)
+            return result.Error.ToActionResult();
 
-        return Unauthorized(new { error = token.Error });
+        Response.Cookies.Append(
+            AuthCookieName,
+            result.Value.Token,
+            CreateAuthCookieOptions());
+
+        return Ok(result.Value.User);
     }
-    
+
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete(AuthCookieName);
-        return Ok("Успешный выход из системы.");
+        Response.Cookies.Delete(AuthCookieName, CreateCookieDeletionOptions());
+        return Ok();
     }
 
     [Authorize]
     [HttpGet("me")]
     public IActionResult GetCurrentUser()
     {
-        
-        var userId = currentUserIdAccessor.UserId;;
+        var userId = currentUserIdAccessor.UserId;
         var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 
-        return Ok(new UserResponse( userId, email));
+        return Ok(new UserResponse(userId, email));
     }
+
+    private CookieOptions CreateAuthCookieOptions() => new()
+    {
+        HttpOnly = true,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTimeOffset.UtcNow.AddMinutes(jwtOptions.Value.ExpiryMinutes),
+        Secure = Request.IsHttps,
+        Path = "/"
+    };
+
+    private CookieOptions CreateCookieDeletionOptions() => new()
+    {
+        HttpOnly = true,
+        SameSite = SameSiteMode.Strict,
+        Secure = Request.IsHttps,
+        Path = "/"
+    };
 }

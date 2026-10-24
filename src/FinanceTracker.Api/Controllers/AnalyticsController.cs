@@ -1,3 +1,4 @@
+using FinanceTracker.Api.Extensions;
 using FinanceTracker.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +17,7 @@ public class AnalyticsController(IAnalyticsService analyticsService) : Controlle
         CancellationToken ct)
     {
         var result = await analyticsService.GetCompleteSummaryAsync(fromDate, toDate, ct);
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : BadRequest(new { error = result.Error} );
+        return result.ToActionResult();
     }
 
     [HttpGet("trend")]
@@ -28,11 +27,9 @@ public class AnalyticsController(IAnalyticsService analyticsService) : Controlle
         CancellationToken ct)
     {
         var result = await analyticsService.GetTrendPointsAsync(fromDate, toDate, ct);
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : BadRequest(new { error = result.Error} );
+        return result.ToActionResult();
     }
-    
+
     [HttpGet("topexpenses")]
     public async Task<IActionResult> GetTopExpenses(
         [FromQuery] DateTime fromDate,
@@ -41,8 +38,6 @@ public class AnalyticsController(IAnalyticsService analyticsService) : Controlle
         CancellationToken ct)
     {
         var result = await analyticsService.GetTopExpensesAsync(fromDate, toDate, topCount, ct);
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : BadRequest(new { error = result.Error} );
+        return result.ToActionResult();
     }
 }
